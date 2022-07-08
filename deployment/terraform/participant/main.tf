@@ -31,11 +31,6 @@ locals {
   api_key = random_password.apikey.result
 }
 
-resource "azurerm_resource_group" "participant" {
-  name     = var.resource_group
-  location = var.location
-}
-
 data "azurerm_container_registry" "registry" {
   name                = var.acr_name
   resource_group_name = var.acr_resource_group
@@ -64,6 +59,11 @@ locals {
   edc_default_port    = 8181
   edc_ids_port        = 8282
   edc_management_port = 9191
+}
+
+resource "azurerm_resource_group" "participant" {
+  name     = var.resource_group
+  location = var.location
 }
 
 resource "azurerm_container_group" "edc" {
@@ -116,18 +116,21 @@ resource "azurerm_container_group" "edc" {
 
       IDS_WEBHOOK_ADDRESS = "http://${local.edc_dns_label}.${var.location}.azurecontainer.io:${local.edc_ids_port}"
 
-      NODES_JSON_DIR          = "/registry"
-      NODES_JSON_FILES_PREFIX = local.registry_files_prefix
+      REGISTRATION_SERVICE_API_URL = var.registration_service_api_url
 
       # Refresh catalog frequently to accelerate scenarios
       EDC_CATALOG_CACHE_EXECUTION_DELAY_SECONDS  = 10
       EDC_CATALOG_CACHE_EXECUTION_PERIOD_SECONDS = 10
+
+      APPLICATIONINSIGHTS_ROLE_NAME = local.connector_name
     }
 
     secure_environment_variables = {
       EDC_VAULT_CLIENTSECRET = var.application_sp_client_secret
 
       EDC_API_AUTH_KEY = local.api_key
+
+      APPLICATIONINSIGHTS_CONNECTION_STRING = var.app_insights_connection_string
     }
 
     volume {
@@ -143,6 +146,7 @@ resource "azurerm_container_group" "edc" {
         port = 8181
         path = "/api/check/health"
       }
+      failure_threshold = 6
     }
   }
 }
