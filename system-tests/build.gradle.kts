@@ -52,7 +52,7 @@ dependencies {
     testImplementation("org.awaitility:awaitility:${awaitility}")
 
     testImplementation("com.azure:azure-identity:${azureIdentityVersion}")
-    testImplementation("com.azure:azure-security-keyvault-secrets:4.2.3")
+    testImplementation("com.azure:azure-security-keyvault-secrets:4.4.5")
     testImplementation("${edcGroup}:contract-spi:${edcVersion}")
     testImplementation("${edcGroup}:federated-catalog-spi:${edcVersion}")
     testImplementation("${edcGroup}:policy-evaluator:${edcVersion}")
